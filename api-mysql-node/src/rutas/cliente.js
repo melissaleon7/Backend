@@ -15,6 +15,7 @@ rutas.get('/cliente',(req,res) =>{
 	})
 });
 
+
 //Buscar cliente por ID
 rutas.get('/cliente/:IDCliente',(req,res)=>{
 	const IDCliente=req.params.IDCliente;
@@ -28,36 +29,64 @@ rutas.get('/cliente/:IDCliente',(req,res)=>{
 });
 
 
+
+
 //Alta de un cliente
 rutas.post('/cliente',(req,res) => {
-	const { Nombre, ApPat, ApMat, Nac, RFC, Tel, Dir} = req.body;
+	var { Nombre, ApPat, ApMat, Nac, RFC, Tel, Dir} = req.body;
     if(validacion(Nombre, ApPat, ApMat, Nac))
     {
-    	if(validarTelefono(Tel))
-    	{
+			const query1 = "SELECT MAX(IDCliente) AS mayor FROM cliente";
+		 	 mysqlConexion.query(query1,(err,filas,campos)=>{
+				if(!err){
+						var IDCliente = filas[0].mayor + 1;
+					//console.log("Agarró el id:"+filas[0].mayor + 1);
+					//console.log(IDCliente,Nombre, ApPat, ApMat, Nac, RFC, Tel, Dir);
+					    RFC = validarRFC(RFC);
+					    Tel = validarTelefono(Tel);
 
-    		if(validarRFC(RFC))
-    		{
-    			IDCliente= regresarID();
-	const query = "INSERT INTO cliente(IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel,Dir) VALUES(?,?,?,?,?,?,?,?)";
-	mysqlConexion.query(query,[IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel,Dir],(err,filas,campos) => {
-			if(!err){
-				res.json({estatus: 'El cliente '+Nombre+' ha sido dado de alta exitosamente!'})
-		
-			}else{
-			console.log("Hay un error"+err);	
-			}
-		})
-			}else{
-				console.log("RFC nulo")
-			}
-		}else{
-			res.json({Tel:'Sin telefono'});
-		}	
+              //Aquí va la validación de duplas
+
+const query2 = "SELECT Nombre, ApPat,ApMat FROM cliente WHERE Nombre= ? AND ApPat=? AND ApMat = ?";
+		 	 	mysqlConexion.query(query2,[Nombre, ApPat, ApMat],(err,filas,campos)=>{
+		if(filas.length > 0)
+		 	 	{
+                     res.json({estatus:'Cliente duplicado'}) 
+
+		 	 	}else{
+		 	 		
+						const query = "INSERT INTO cliente(IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel,Dir) VALUES(?,?,?,?,?,?,?,?)";
+					mysqlConexion.query(query,[IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel,Dir],(err,filas,campos) => {
+						if(!err){
+							res.json({estatus: 'El cliente '+Nombre+' ha sido dado de alta exitosamente!'})
+					
+						}else{
+						console.log("Hay un error "+err);	
+						}
+					});
+
+		 	 	}
+		 	 })
+
+
+
+
+
+				
+					
+				}else{
+					console.log(err);
+				}
+			});
 	}else{
+
 		res.json({estatus:'Datos incompletos'})
 	}
+    		
 });
+
+
+
 
 //Modificar cliente
 rutas.put('/cliente/:IDCliente',(req,res) =>{
@@ -81,22 +110,6 @@ rutas.delete=(req,res) =>{
 
 module.exports =rutas;
 
-
-
-function regresarID()
-{
-	IDCliente=0;
-
-	const query= "SELECT MAX(IDCliente) AS mayor FROM cliente";
-	mysqlConexion.query(query,(err,filas,campos)=>{
-		if(!err){
-			IDCliente= filas['mayor']+1;
-		}else{
-			console.log("mm"+err);
-		}
-	})
-	return IDCliente;
-}
 function validacion( Nombre, ApPat, ApMat, Nac){
 	
     var respuesta=true;
@@ -118,26 +131,39 @@ function validacion( Nombre, ApPat, ApMat, Nac){
 	 return respuesta;
 }
 
-
 function validarTelefono(Tel){
-	var respuesta=true;
+	var respuesta='';
 
 	if(Tel=="")
 	{
-		respuesta=false;
+		respuesta= 'Sin telefono';
 	}
 
 	return respuesta;
 }
 
-
 function validarRFC(RFC){
-	var respuesta=true;
+	var respuesta='';
 
 	if(RFC == "")
 	{
-		respuesta=false;
+		respuesta='Sin RFC';
 	}
 
 	return respuesta;
 }
+
+//function validarDuplas(Nombre,ApMat,ApPat){
+
+//var respuesta='';
+//		const query = "SELECT Nombre, ApPat,ApMat FROM cliente WHERE Nombre= ? AND ApPat=? AND ApMat = ?";
+//		 	 	mysqlConexion.query(query,[Nombre, ApPat, ApMat],(err,filas,campos)=>{
+//		if(filas.length()>0)
+//		 	 	{
+ //            res.json({'Cliente duplicado'}) ;
+//		 	 	}
+//		 	 })
+
+			
+
+//}

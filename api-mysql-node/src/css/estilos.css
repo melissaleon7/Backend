@@ -1,0 +1,113 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css?family=Coming+Soon|Lobster&display=swap');
+</style>
+*{
+	border: 0;
+	margin: 0;
+	padding: 0;
+}
+
+body
+{
+	font-size: 16px;
+	max-width: 1024px;
+	margin: 0px auto;
+}
+
+header{
+	background: #4A2014;
+	padding-bottom: 20px;
+	padding-top: 20px;
+	text-align: center;
+	font-family: 'Lobster', cursive;
+}
+
+header	span{
+
+}
+#secc01art02 ul{
+	display: inline-block;
+}
+
+#secc01 article{
+
+	background: #545157;
+	display: inline-block;
+	padding-top: 30px;
+	/*text-align: center;*/
+}
+#secc01art02
+{
+	margin-top: 50px;
+	width: 600px;
+}
+
+#secc01art01
+{
+	text-align: center;
+	margin-right: 100px;
+	padding-bottom: 100px;
+	vertical-align: top;
+}
+#secc01art02 nav ul li{
+	color:white;
+}
+
+#secc01art02 ul li:before{
+	content: " ";
+	color: #FF6017;
+}
+
+#secc01art02 ul
+{
+	list-style: none;
+
+}
+#secc01art02 input[type="button"]{
+
+}
+
+#secc01art01 input[type="button"]{
+	
+	background: white;
+	border-radius: 3px;
+	color: #87CEFA; 
+	padding: 5px 8px;
+    vertical-align: center;
+    align-items: center;
+}
+
+#secc01art02 input[type="button"]{
+	color: white;
+	background: #4A2014;
+	border-radius: 3px;
+	border-color: white;
+	width: 49%;
+	vertical-align: top;
+}
+
+.amarillo
+{
+	color: #F7C50F
+}
+
+.naranja
+{
+	background: #FF6017;
+}
+.letraBlanca{
+color: white;
+}
+.letraGrande{
+font-size: 4.2em;
+}
+.letraMediana{
+	font-size: 2em;
+}
+.letraPequeña{
+	font-size: 1em;
+}
+
+
+

@@ -4,6 +4,7 @@
   	host: 'localhost',
   	user: 'root',
   	password: '',
+    port: 3306,
   	database: 'china_long'
   },'single');
 
@@ -15,6 +16,7 @@
   		console.log('Base de datos conectada correctamente');
   	}
   });
+
 
 
   module.exports = mysqlConexion;

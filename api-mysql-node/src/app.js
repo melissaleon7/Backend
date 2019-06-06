@@ -1,11 +1,15 @@
 const express = require('express');
 const app= express();
+const mysql= require('mysql');
+ 
 
 app.set('port',process.env.PORT || 3000);
 
 
 app.use(express.json());
+app.use(express.urlencoded({extended:false}));
 
+//Usamos las rutas
 app.use(require('./rutas/cliente.js'));
 app.use(require('./rutas/clientemesa.js'));
 app.use(require('./rutas/consumo.js'));

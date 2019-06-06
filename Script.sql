@@ -37,14 +37,13 @@ DROP TABLE IF EXISTS `Venta` CASCADE
 
 CREATE TABLE `Cliente`
 (
-	`IDCliente` INT NOT NULL,
+	`IDCliente` INT NOT NULL AUTO_INCREMENT,
 	`Nombre` VARCHAR(30) NOT NULL,
 	`ApPat` VARCHAR(60) NOT NULL,
 	`ApMat` VARCHAR(60) NOT NULL,
 	`Nac` DATE NOT NULL,
 	`RFC` VARCHAR(13) NULL,
 	`Tel` VARCHAR(12) NULL,
-	`Dir` VARCHAR(200) NULL,
 	CONSTRAINT `PK_Cliente` PRIMARY KEY (`IDCliente` ASC)
 )
 
@@ -73,7 +72,8 @@ CREATE TABLE `Consumo`
 
 CREATE TABLE `Menu`
 (
-	`IDPlatillo` INT NOT NULL,
+	`IDPlatillo` INT NOT NULL AUTO_INCREMENT,
+	`Nombre` VARCHAR(200) NOT NULL,
 	`Desc` VARCHAR(200) NOT NULL,
 	`Tipo` CHAR(2) NOT NULL,
 	`Precio` DOUBLE(10,2) NOT NULL,
@@ -84,7 +84,7 @@ CREATE TABLE `Menu`
 
 CREATE TABLE `Mesa`
 (
-	`IDMesa` INT NOT NULL,
+	`IDMesa` INT NOT NULL AUTO_INCREMENT,
 	`Cantidad` INT NULL,
 	CONSTRAINT `PK_Mesa` PRIMARY KEY (`IDMesa` ASC)
 )
@@ -93,7 +93,7 @@ CREATE TABLE `Mesa`
 
 CREATE TABLE `Mesero`
 (
-	`IDEmp` INT NOT NULL,
+	`IDEmp` INT NOT NULL AUTO_INCREMENT,
 	`Nombre` VARCHAR(30) NOT NULL,
 	`ApPat` VARCHAR(60) NOT NULL,
 	`ApMat` VARCHAR(60) NOT NULL,
@@ -111,13 +111,11 @@ CREATE TABLE `MeseroMesa`
 (
 	`IDMesero` INT NOT NULL,
 	`IDMesa` INT NOT NULL
-)
-
-;
+);
 
 CREATE TABLE `Venta`
 (
-	`IDVenta` INT NOT NULL,
+	`IDVenta` INT NOT NULL AUTO_INCREMENT,
 	`IDCliente` INT NOT NULL,
 	`CantidadTotal` INT NOT NULL,
 	`SubTotal` DOUBLE(10,2) NOT NULL,
@@ -126,10 +124,17 @@ CREATE TABLE `Venta`
 	`Fecha` DATE NOT NULL,
 	`Hora` TIME NOT NULL,
 	CONSTRAINT `PK_Venta` PRIMARY KEY (`IDVenta` ASC)
-)
+);
 
-;
-
+CREATE TABLE `Rerservacion`
+(
+	`IDReservacion` INT NOT NULL AUTO_INCREMENT,
+	`IDCliente` INT NOT NULL,
+	`NoComenzales` INT NOT NULL,
+	`IDMesero` INT NOT NULL,
+	`IDMesa` INT NOT NULL,
+	CONSTRAINT `PK_Reservacion` PRIMARY KEY (`IDReservacion` ASC)
+);
 /* Create Foreign Key Constraints */
 
 ALTER TABLE `ClienteMesa` 

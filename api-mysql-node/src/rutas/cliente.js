@@ -6,7 +6,7 @@ const mysqlConexion = require('../basededatos.js')
 
 //Consulta de clientes
 rutas.get('/cliente',(req,res) =>{
-	mysqlConexion.query('SELECT * FROM cliente',(err,filas,campos) =>{
+	mysqlConexion.query('SELECT IDCliente,Nombre,ApPat,ApMat FROM cliente',(err,filas,campos) =>{
 		if(!err){
 			res.json(filas);
 		}else{
@@ -33,7 +33,7 @@ rutas.get('/cliente/:IDCliente',(req,res)=>{
 
 //Alta de un cliente
 rutas.post('/cliente',(req,res) => {
-	var { Nombre, ApPat, ApMat, Nac, RFC, Tel, Dir} = req.body;
+	var { Nombre, ApPat, ApMat, Nac, RFC, Tel} = req.body;
     if(validacion(Nombre, ApPat, ApMat, Nac))
     {
 			const query1 = "SELECT MAX(IDCliente) AS mayor FROM cliente";
@@ -54,9 +54,9 @@ const query2 = "SELECT Nombre, ApPat,ApMat FROM cliente WHERE Nombre= ? AND ApPa
                      res.json({estatus:'Cliente duplicado'}) 
 
 		 	 	}else{
-		 	 		
-						const query = "INSERT INTO cliente(IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel,Dir) VALUES(?,?,?,?,?,?,?,?)";
-					mysqlConexion.query(query,[IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel,Dir],(err,filas,campos) => {
+
+						const query = "INSERT INTO cliente(IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel) VALUES(?,?,?,?,?,?,?)";
+					mysqlConexion.query(query,[IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel],(err,filas,campos) => {
 						if(!err){
 							res.json({estatus: 'El cliente '+Nombre+' ha sido dado de alta exitosamente!'})
 					
@@ -90,6 +90,7 @@ const query2 = "SELECT Nombre, ApPat,ApMat FROM cliente WHERE Nombre= ? AND ApPa
 
 //Modificar cliente
 rutas.put('/cliente/:IDCliente',(req,res) =>{
+    const IDCliente =req.params.IDCliente;
 	const {Nombre, ApPat, ApMat} = req.body;
 	const query= "UPDATE cliente SET Nombre = ?, ApPat = ?, ApMat = ? WHERE IDCliente = ?";
 	mysqlConexion.query(query,[Nombre, ApPat, ApMat, IDCliente],(err,filas,campos)=>{
@@ -103,10 +104,18 @@ rutas.put('/cliente/:IDCliente',(req,res) =>{
 
 
 //Eliminar cliente
-rutas.delete=(req,res) =>{
-	const { id } = req.params;
-	re.get
-}
+rutas.delete('/cliente/:IDCliente'),(req,res) =>{
+	const IDCliente= req.params.IDCliente;
+	console.log(".."+IDCliente);
+	const query ="DELETE FROM cliente WHERE IDCliente = ?";
+	mysqlConexion.query(query,[IDCliente],(err,filas,campos)=>{
+		if(!err){
+			res.json({estatus: "El cliente "+Nombre+" ha sido eliminado correctamente"});
+		}else{
+			console.log(err);
+		}
+	})
+};
 
 module.exports =rutas;
 
@@ -153,17 +162,3 @@ function validarRFC(RFC){
 	return respuesta;
 }
 
-//function validarDuplas(Nombre,ApMat,ApPat){
-
-//var respuesta='';
-//		const query = "SELECT Nombre, ApPat,ApMat FROM cliente WHERE Nombre= ? AND ApPat=? AND ApMat = ?";
-//		 	 	mysqlConexion.query(query,[Nombre, ApPat, ApMat],(err,filas,campos)=>{
-//		if(filas.length()>0)
-//		 	 	{
- //            res.json({'Cliente duplicado'}) ;
-//		 	 	}
-//		 	 })
-
-			
-
-//}

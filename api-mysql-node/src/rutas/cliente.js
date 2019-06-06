@@ -55,7 +55,7 @@ const query2 = "SELECT Nombre, ApPat,ApMat FROM cliente WHERE Nombre= ? AND ApPa
 
 		 	 	}else{
 		 	 		
-						const query = "INSERT INTO cliente(IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel) VALUES(?,?,?,?,?,?,?,?)";
+						const query = "INSERT INTO cliente(IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel) VALUES(?,?,?,?,?,?,?)";
 					mysqlConexion.query(query,[IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel],(err,filas,campos) => {
 						if(!err){
 							res.json({estatus: 'El cliente '+Nombre+' ha sido dado de alta exitosamente!'})
@@ -66,13 +66,7 @@ const query2 = "SELECT Nombre, ApPat,ApMat FROM cliente WHERE Nombre= ? AND ApPa
 					});
 
 		 	 	}
-		 	 })
-
-
-
-
-
-				
+		 	 })		
 					
 				}else{
 					console.log(err);
@@ -90,6 +84,7 @@ const query2 = "SELECT Nombre, ApPat,ApMat FROM cliente WHERE Nombre= ? AND ApPa
 
 //Modificar cliente
 rutas.put('/cliente/:IDCliente',(req,res) =>{
+	const IDCliente = req.params.IDCliente;
 	const {Nombre, ApPat, ApMat} = req.body;
 	const query= "UPDATE cliente SET Nombre = ?, ApPat = ?, ApMat = ? WHERE IDCliente = ?";
 	mysqlConexion.query(query,[Nombre, ApPat, ApMat, IDCliente],(err,filas,campos)=>{
@@ -101,12 +96,19 @@ rutas.put('/cliente/:IDCliente',(req,res) =>{
 	})
 });
 
-
-//Eliminar cliente
-rutas.delete=(req,res) =>{
-	const { id } = req.params;
-	re.get
-}
+//eliminar
+rutas.delete('/cliente/:IDCliente'),(req,res) =>{
+	const IDCliente= req.params.IDCliente;
+	console.log(".."+IDCliente);
+	const query ="DELETE FROM cliente WHERE IDCliente = ?";
+	mysqlConexion.query(query,[IDCliente],(err,filas,campos)=>{
+		if(!err){
+			res.json({estatus: "El cliente "+Nombre+" ha sido eliminado correctamente"});
+		}else{
+			console.log(err);
+		}
+	})
+};
 
 module.exports =rutas;
 

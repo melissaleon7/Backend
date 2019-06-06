@@ -16,9 +16,9 @@ rutas.get('/mesero',(req,res) =>{
 });
 
 //Buscar mesero por ID
-rutas.get('/mesero/:IDmesero',(req,res)=>{
-	const IDmesero=req.params.IDmesero;
-	mysqlConexion.query('SELECT * FROM mesero WHERE IDmesero = ?',[IDmesero],(err,filas,campos) =>{
+rutas.get('/mesero/:IDEmp',(req,res)=>{
+	const IDEmp=req.params.IDEmp;
+	mysqlConexion.query('SELECT * FROM mesero WHERE IDEmp = ?',[IDEmp],(err,filas,campos) =>{
 		if(!err){
 			res.json(filas);
 		}else{
@@ -38,9 +38,9 @@ rutas.post('/mesero',(req,res) => {
 
     		if(validarRFC(Correo))
     		{
-    			IDmesero= regresarID();
-	const query = "INSERT INTO mesero(IDmesero,Nombre,ApPat,ApMat,Tel,Correo,Dir,Sueldo,Horario) VALUES(?,?,?,?,?,?,?,?)";
-	mysqlConexion.query(query,[IDmesero,Nombre,ApPat,ApMat,Tel,Correo,Dir,Sueldo,Horario],(err,filas,campos) => {
+    			IDEmp= regresarID();
+	const query = "INSERT INTO mesero(IDEmp,Nombre,ApPat,ApMat,Tel,Correo,Dir,Sueldo,Horario) VALUES(?,?,?,?,?,?,?,?,?)";
+	mysqlConexion.query(query,[IDEmp,Nombre,ApPat,ApMat,Tel,Correo,Dir,Sueldo,Horario],(err,filas,campos) => {
 			if(!err){
 				res.json({estatus: 'El mesero '+Nombre+' ha sido dado de alta exitosamente!'})
 		
@@ -60,10 +60,11 @@ rutas.post('/mesero',(req,res) => {
 });
 
 //Modificar mesero
-rutas.put('/mesero/:IDmesero',(req,res) =>{
+rutas.put('/mesero/:IDEmp',(req,res) =>{
+	const IDEmp = req.params.IDEmp;
 	const {Nombre, ApPat, ApMat} = req.body;
-	const query= "UPDATE mesero SET Nombre = ?, ApPat = ?, ApMat = ? WHERE IDmesero = ?";
-	mysqlConexion.query(query,[Nombre, ApPat, ApMat, IDmesero],(err,filas,campos)=>{
+	const query= "UPDATE mesero SET Nombre = ?, ApPat = ?, ApMat = ? WHERE IDEmp = ?";
+	mysqlConexion.query(query,[Nombre, ApPat, ApMat, IDEmp],(err,filas,campos)=>{
 		if(!err){
 			res.json({estatus: "El mesero "+Nombre+" ha sido modificado correctamente"});
 		}else{
@@ -74,30 +75,34 @@ rutas.put('/mesero/:IDmesero',(req,res) =>{
 
 
 //Eliminar mesero
-rutas.delete=(req,res) =>{
-	const { id } = req.params;
-	re.get
-}
-
+rutas.delete('/mesero/:IDEmp'),(req,res) =>{
+	const IDEmp= req.params.IDEmp;
+	const query ="DELETE FROM mesero WHERE IDEmp = ?";
+	mysqlConexion.query(query,[IDEmp],(err,filas,campos)=>{
+		if(!err){
+			res.json({estatus: "El mesero"+Nombre+" ha sido eliminado correctamente"});
+		}else{
+			console.log(err);
+		}
+	})
+};
 module.exports =rutas;
-
-
 
 function regresarID()
 {
-	IDmesero=0;
+	IDEmp=0;
 
-	const query= "SELECT MAX(IDmesero) AS mayor FROM mesero";
+	const query= "SELECT MAX(IDEmp) AS mayor FROM mesero";
 	mysqlConexion.query(query,(err,filas,campos)=>{
 		if(!err){
-			IDmesero= filas['mayor']+1;
+			IDEmp= filas['mayor']+1;
 		}else{
 			console.log("mm"+err);
 		}
 	})
-	return IDmesero;
+	return IDEmp;
 }
-function validacion( Nombre, ApPat, ApMat){
+function validacion( Nombre,ApPat,ApMat,Tel,Correo,Dir,Sueldo,Horario){
 	
     var respuesta=true;
 
@@ -110,29 +115,20 @@ function validacion( Nombre, ApPat, ApMat){
 	if(ApMat == ""){
 		respuesta=false;
 	}
+	if(Tel == ""){
+		respuesta=false;
+	}
+	if(Correo == ""){
+		respuesta=false;
+	}
+	if(Dir == ""){
+		respuesta=false;
+	}
+	if(Sueldo == ""){
+		respuesta=false;
+	}
+	if(Horario == ""){
+		respuesta=false;
+	}
 	 return respuesta;
-}
-
-
-function validarTelefono(Tel){
-	var respuesta=true;
-
-	if(Tel=="")
-	{
-		respuesta=false;
-	}
-
-	return respuesta;
-}
-
-
-function validarRFC(Correo){
-	var respuesta=true;
-
-	if(Correo == "")
-	{
-		respuesta=false;
-	}
-
-	return respuesta;
 }

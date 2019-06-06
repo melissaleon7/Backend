@@ -33,7 +33,7 @@ rutas.get('/cliente/:IDCliente',(req,res)=>{
 
 //Alta de un cliente
 rutas.post('/cliente',(req,res) => {
-	var { Nombre, ApPat, ApMat, Nac, RFC, Tel, Dir} = req.body;
+	var { Nombre, ApPat, ApMat, Nac, RFC, Tel} = req.body;
     if(validacion(Nombre, ApPat, ApMat, Nac))
     {
 			const query1 = "SELECT MAX(IDCliente) AS mayor FROM cliente";
@@ -55,8 +55,8 @@ const query2 = "SELECT Nombre, ApPat,ApMat FROM cliente WHERE Nombre= ? AND ApPa
 
 		 	 	}else{
 		 	 		
-						const query = "INSERT INTO cliente(IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel,Dir) VALUES(?,?,?,?,?,?,?,?)";
-					mysqlConexion.query(query,[IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel,Dir],(err,filas,campos) => {
+						const query = "INSERT INTO cliente(IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel) VALUES(?,?,?,?,?,?,?,?)";
+					mysqlConexion.query(query,[IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel],(err,filas,campos) => {
 						if(!err){
 							res.json({estatus: 'El cliente '+Nombre+' ha sido dado de alta exitosamente!'})
 					

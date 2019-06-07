@@ -14,71 +14,213 @@ rutas.get('/menu',(req,res) =>{
 	})
 });
 
-
-//Dar de alta un platillo
-rutas.post('/menu',(req,res) =>{
-	const { IDEmp, Nombre, Desc, Tipo, Precio} = req.body;
-	const query = "INSERT INTO menu(IDEmp, Nombre, Desc, Tipo, Precio) VALUES(?,?,?,?,?)";
-	mysqlConexion.query(query,[IDEmp,Nombre,Desc,Tipo,Precio],(err,filas,campos)=>{
+//Buscar menu por ID
+rutas.get('/menu/:IDPlatillo',(req,res)=>{
+	const IDPlatillo=req.params.IDPlatillo;
+	mysqlConexion.query('SELECT * FROM menu WHERE IDPlatillo = ?',[IDPlatillo],(err,filas,campos) =>{
 		if(!err){
-			res.json({estatus:"¡Agregado correctamente."});
-		}else{
-			console.log(err);
-		}
-	})
-}
-	
-);
-
-//Modificar platillo
-rutas.put('/menu/:IDEmp',(req,res) =>{
-	const IDEmp = req.params.IDEmp;
-	const {Nombre,Tipo,Precio} = req.body;
-	const query= "UPDATE menu SET  Nombre = ?, Tipo=?,Precio = ? WHERE IDEmp = ?";
-	mysqlConexion.query(query,[Nombre, Tipo, Precio, IDEmp],(err,filas,campos)=>{
-		if(!err){
-			res.json({estatus: "Modificado correctamente."});
+			res.json(filas);
 		}else{
 			console.log(err);
 		}
 	})
 });
 
-//Eliminar cliente
-rutas.delete('/menu/:IDEmp'),(req,res) =>{
-	const IDEmp= req.params.IDEmp;
-	const query ="DELETE FROM menu WHERE IDEmp = ?";
-	mysqlConexion.query(query,[IDEmp],(err,filas,campos)=>{
+
+
+//Alta de un platillo
+rutas.post('/menu',(req,res) => {
+	var { Nombre, Descr,Tipo,Precio} = req.body;
+    if(validacion(Nombre, Descr,Tipo))
+    {
+    	
+			const query1 = "SELECT MAX(IDPlatillo) AS mayor FROM menu";
+		 	 mysqlConexion.query(query1,(err,filas,campos)=>{
+				if(!err){
+					if(filas[0].mayor<=0){
+						IDPlatillo = 1;
+						
+
+              //Aquí va la validación de duplas
+			const query2 = "SELECT Nombre,Descr, Tipo  FROM menu WHERE Nombre= ? AND Descr=? AND Tipo = ?";
+		 	 	mysqlConexion.query(query2,[Nombre, Descr,Tipo],(err,filas,campos)=>{
+		 	 		var tamaño = filas.length;
+				if(tamaño >0)
+		 	 	{
+                     res.json({estatus:'Platillo '+Nombre+' duplicado'}) 
+
+		 	 	}else{
+					const query = "INSERT INTO menu(IDPlatillo,Nombre, Descr,Tipo,Precio) VALUES(?,?,?,?,?)";
+					mysqlConexion.query(query,[IDPlatillo,Nombre,Descr,Tipo,Precio],(err,filas,campos) => {
+						if(!err){
+							res.json({estatus: 'El platillo '+Nombre+' ha sido dado de alta exitosamente!'})
+					
+						}else{
+						console.log("Hay un error "+err);	
+						}
+					});
+
+		 	 	}
+		 	 })
+					}else
+					{
+						var IDPlatillo = filas[0].mayor + 1;
+				
+
+              //Aquí va la validación de duplas
+			const query2 = "SELECT Nombre, Descr,Tipo FROM menu WHERE Nombre= ? AND Descr=? AND Tipo = ?";
+		 	 	mysqlConexion.query(query2,[Nombre, Descr,Tipo],(err,filas,campos)=>{
+		 	 		console.log("----------"+filas.length)
+		 	 		var tamaño1 = filas.length;
+				if(tamaño1 >0)
+		 	 	{
+                     res.json({estatus:'Platillo '+Nombre+' duplicado'}) 
+
+		 	 	}else{
+					const query = "INSERT INTO menu(IDPlatillo,Nombre,Descr,Tipo,Precio) VALUES(?,?,?,?,?)";
+					mysqlConexion.query(query,[IDPlatillo,Nombre,Descr,Tipo,Precio],(err,filas,campos) => {
+						if(!err){
+							res.json({estatus: 'El platillo '+Nombre+' ha sido dado de alta exitosamente!'})
+					
+						}else{
+						console.log("Hay un error "+err);	
+						}
+					});
+
+		 	 	}
+		 	 })		
+				}	
+				}else{
+					console.log(err);
+				}
+			
+		});
+		 	
+	}else{
+
+		res.json({estatus:'Datos incompletos'})
+	}
+    		
+});
+
+
+
+
+
+
+
+
+
+//Modificar menu
+rutas.put('/menu/:IDPlatillo',(req,res) =>{
+	const IDPlatillo = req.params.IDPlatillo;
+	const {Nombre, Tipo,Precio} = req.body;
+	if(buscarId(IDPlatillo))
+	{
+
+
+	if(validarModificar(Nombre, Tipo,Precio))
+	{
+	       
+
+		const query2 = "SELECT Nombre,Tipo,Precio FROM menu WHERE Nombre= ? AND Tipo=? AND Precio = ?";
+		 	 	mysqlConexion.query(query2,[Nombre, Tipo,Precio],(err,filas,campos)=>{
+				if(filas.length > 0)
+		 	 	{
+                     res.json({estatus:'Platillo '+Nombre+' duplicado'}) 
+
+		 	 	}else{
+	const query= "UPDATE menu SET Nombre = ?, Tipo = ?, Precio = ? WHERE IDPlatillo = ?";
+	mysqlConexion.query(query,[Nombre, Tipo,Precio,IDPlatillo],(err,filas,campos)=>{
 		if(!err){
-			res.json({estatus: "El menu "+Nombre+" ha sido eliminado correctamente"});
+			res.json({estatus: "El platillo "+Nombre+" ha sido modificado correctamente"});
+		}else{
+			console.log(err);
+		}
+	})
+}
+})
+}else{
+	res.json({estatus:'Datos incompletos'})
+}}
+else{
+	res.json({estatus:'Platillo no existente'})
+}
+});
+
+
+//Eliminar platillo
+rutas.delete('/menu/:IDPlatillo'),(req,res) =>{
+	const IDPlatillo= req.params.IDPlatillo;
+	const query ="DELETE FROM menu WHERE IDPlatillo = ?";
+	mysqlConexion.query(query,[IDPlatillo],(err,filas,campos)=>{
+		if(!err){
+			res.json({estatus: "El platillo "+Nombre+" ha sido eliminado correctamente"});
 		}else{
 			console.log(err);
 		}
 	})
 };
 
+
+
+
 module.exports =rutas;
 
 
-function regresarID()
-{
-	IDEmp=0;
 
-	const query= "SELECT MAX(IDEmp) AS mayor FROM menu";
-	mysqlConexion.query(query,(err,filas,campos)=>{
-		if(!err){
-			IDEmp= filas['mayor']+1;
+
+function buscarId(IDPlatillo)
+{
+var respuesta=true;
+const query ="SELECT * FROM menu WHERE IDPlatillo=?";
+mysqlConexion.query(query,[IDPlatillo],(err,filas,campos)=>{ 
+   if(!err){
+			respuesta= false;
+			return respuesta;
 		}else{
-			console.log("mm"+err);
+			console.log(err);
 		}
 	})
-	return IDEmp;
+}
+
+
+
+function validacion( Nombre, Descr, Tipo){
+	
+    var respuesta=true;
+
+
+
+	if(Nombre == ""){
+		respuesta=false;
+	}
+	if(Descr == ""){
+		respuesta=false;
+	}
+	if(Tipo == ""){
+		respuesta=false;
+	}
+	
+	 return respuesta;
 }
 
 
 
 
+function validarModificar(Nombre, Tipo,Precio){
+	
+    var respuesta=true;
 
-
-
-
+	if(Nombre == ""){
+		respuesta=false;
+	}
+	if(Tipo == ""){
+		respuesta=false;
+	}
+	if(Precio == ""){
+		respuesta=false;
+	}
+	
+	 return respuesta;
+}

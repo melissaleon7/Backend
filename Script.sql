@@ -7,32 +7,6 @@
 SET FOREIGN_KEY_CHECKS=0 
 ;
 
-/* Drop Tables */
-
-DROP TABLE IF EXISTS `Cliente` CASCADE
-;
-
-DROP TABLE IF EXISTS `ClienteMesa` CASCADE
-;
-
-DROP TABLE IF EXISTS `Consumo` CASCADE
-;
-
-DROP TABLE IF EXISTS `Menu` CASCADE
-;
-
-DROP TABLE IF EXISTS `Mesa` CASCADE
-;
-
-DROP TABLE IF EXISTS `Mesero` CASCADE
-;
-
-DROP TABLE IF EXISTS `MeseroMesa` CASCADE
-;
-
-DROP TABLE IF EXISTS `Venta` CASCADE
-;
-
 /* Create Tables */
 
 CREATE TABLE `Cliente`
@@ -60,12 +34,13 @@ CREATE TABLE `ClienteMesa`
 
 CREATE TABLE `Consumo`
 (
-	`ID` INT NOT NULL AUTO_INCREMENT,
-	`IDVenta` INT NOT NULL,
+	`IDConsumo` INT NOT NULL AUTO_INCREMENT,
+	`IDCliente` INT NOT NULL,
 	`IDPlatillo` INT NOT NULL,
+	`IDEmp` INT NOT NULL,
+	`IDMesa` INT NOT NULL,
 	`Cantidad` INT NOT NULL,
-	`Total` DOUBLE(10,0) NOT NULL,
-	CONSTRAINT `PK_Consumo` PRIMARY KEY (`ID` ASC)
+	CONSTRAINT `PK_Consumo` PRIMARY KEY (`IDConsumo` ASC)
 )
 
 ;
@@ -74,7 +49,7 @@ CREATE TABLE `Menu`
 (
 	`IDPlatillo` INT NOT NULL AUTO_INCREMENT,
 	`Nombre` VARCHAR(200) NOT NULL,
-	`Desc` VARCHAR(200) NOT NULL,
+	`Descr` VARCHAR(200) NOT NULL,
 	`Tipo` CHAR(2) NOT NULL,
 	`Precio` DOUBLE(10,2) NOT NULL,
 	CONSTRAINT `PK_Table1` PRIMARY KEY (`IDPlatillo` ASC)
@@ -109,7 +84,7 @@ CREATE TABLE `Mesero`
 
 CREATE TABLE `MeseroMesa`
 (
-	`IDMesero` INT NOT NULL,
+	`IDEmp` INT NOT NULL,
 	`IDMesa` INT NOT NULL
 );
 
@@ -126,15 +101,20 @@ CREATE TABLE `Venta`
 	CONSTRAINT `PK_Venta` PRIMARY KEY (`IDVenta` ASC)
 );
 
-CREATE TABLE `Rerservacion`
-(
-	`IDReservacion` INT NOT NULL AUTO_INCREMENT,
-	`IDCliente` INT NOT NULL,
-	`NoComenzales` INT NOT NULL,
-	`IDMesero` INT NOT NULL,
+
+
+
+CREATE TABLE CobroParcial(
+
+	`IDVenta` INT NOT NULL,
 	`IDMesa` INT NOT NULL,
-	CONSTRAINT `PK_Reservacion` PRIMARY KEY (`IDReservacion` ASC)
+	`IDCliente` INT NOT NULL,
+	`IDEmp` INT NOT NULL,
+	`IDConsumo` INT NOT NULL,
+	`Total` DOUBLE NOT NULL
+
 );
+
 /* Create Foreign Key Constraints */
 
 ALTER TABLE `ClienteMesa` 
@@ -158,10 +138,19 @@ ALTER TABLE `Consumo`
 ;
 
 ALTER TABLE `Consumo` 
- ADD CONSTRAINT `FK_Consumo_Venta`
-	FOREIGN KEY (`IDVenta`) REFERENCES `Venta` (`IDVenta`) ON DELETE Restrict ON UPDATE Restrict
+ ADD CONSTRAINT `FK_Consumo_Cliente`
+	FOREIGN KEY (`IDCliente`) REFERENCES `Cliente` (`IDCliente`) ON DELETE Restrict ON UPDATE Restrict
 ;
 
+ALTER TABLE `Consumo` 
+ ADD CONSTRAINT `FK_Consumo_Mesero`
+	FOREIGN KEY (`IDEmp`) REFERENCES `Mesero` (`IDEmp`) ON DELETE Restrict ON UPDATE Restrict
+;
+
+ALTER TABLE `Consumo` 
+ ADD CONSTRAINT `FK_Consumo_Mesa`
+	FOREIGN KEY (`IDMesa`) REFERENCES `Mesa` (`IDMesa`) ON DELETE Restrict ON UPDATE Restrict
+;
 ALTER TABLE `MeseroMesa` 
  ADD CONSTRAINT `FK_MeseroMesa_Mesa`
 	FOREIGN KEY (`IDMesa`) REFERENCES `Mesa` (`IDMesa`) ON DELETE Restrict ON UPDATE Restrict
@@ -169,12 +158,37 @@ ALTER TABLE `MeseroMesa`
 
 ALTER TABLE `MeseroMesa` 
  ADD CONSTRAINT `FK_MeseroMesa_Mesero`
-	FOREIGN KEY (`IDMesero`) REFERENCES `Mesero` (`IDEmp`) ON DELETE Restrict ON UPDATE Restrict
+	FOREIGN KEY (`IDEmp`) REFERENCES `Mesero` (`IDEmp`) ON DELETE Restrict ON UPDATE Restrict
 ;
 
 ALTER TABLE `Venta` 
  ADD CONSTRAINT `FK_Venta_Cliente`
 	FOREIGN KEY (`IDCliente`) REFERENCES `Cliente` (`IDCliente`) ON DELETE Restrict ON UPDATE Restrict
+;
+
+ALTER TABLE `CobroParcial`
+ ADD CONSTRAINT `FK_CobroParcial_Venta` 
+	FOREIGN KEY (`IDVenta`) REFERENCES `Venta` (`IDVenta`) ON DELETE Restrict ON UPDATE Restrict
+;
+
+ALTER TABLE `CobroParcial`
+ ADD CONSTRAINT `FK_CobroParcial_Mesa`
+	FOREIGN KEY (`IDMesa`) REFERENCES `Mesa` (`IDMesa`) ON DELETE Restrict ON UPDATE Restrict
+;
+
+ALTER TABLE `CobroParcial`
+ ADD CONSTRAINT `FK_CobroParcial_Cliente`
+	FOREIGN KEY (`IDCliente`) REFERENCES `Cliente` (`IDCliente`) ON DELETE Restrict ON UPDATE Restrict
+;
+
+ALTER TABLE `CobroParcial`
+ ADD CONSTRAINT `FK_CobroParcial_Mesero` 
+	FOREIGN KEY (`IDEmp`) REFERENCES `Mesero` (`IDEmp`) ON DELETE Restrict ON UPDATE Restrict
+;
+
+ALTER TABLE `CobroParcial`
+ ADD CONSTRAINT `FK_CobroParcial_Consumo` 
+	FOREIGN KEY (`IDConsumo`) REFERENCES `Consumo` (`IDConsumo`) ON DELETE Restrict ON UPDATE Restrict
 ;
 
 SET FOREIGN_KEY_CHECKS=1 

@@ -36,35 +36,51 @@ rutas.post('/cliente',(req,res) => {
 	var { Nombre, ApPat, ApMat, Nac, RFC, Tel} = req.body;
     if(validacion(Nombre, ApPat, ApMat, Nac))
     {
+    	if(validarNumero(Tel))
+    	{
 			const query1 = "SELECT MAX(IDCliente) AS mayor FROM cliente";
 		 	 mysqlConexion.query(query1,(err,filas,campos)=>{
 				if(!err){
+					if(filas[0].mayor<=0){
+						IDCliente = 1;
+						RFC = validarRFC(RFC);
+					    Tel = validarTelefono(Tel);
+
+              //Aquí va la validación de duplas
+			const query2 = "SELECT Nombre, ApPat,ApMat FROM cliente WHERE Nombre= ? AND ApPat=? AND ApMat = ?";
+		 	 	mysqlConexion.query(query2,[Nombre, ApPat, ApMat],(err,filas,campos)=>{
+				if(filas.length > 0)
+		 	 	{
+                     res.json({estatus:'Cliente '+Nombre+' duplicado'}) 
+
+		 	 	}else{
+					const query = "INSERT INTO cliente(IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel) VALUES(?,?,?,?,?,?,?)";
+					mysqlConexion.query(query,[IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel],(err,filas,campos) => {
+						if(!err){
+							res.json({estatus: 'El cliente '+Nombre+' ha sido dado de alta exitosamente!'})
+					
+						}else{
+						console.log("Hay un error "+err);	
+						}
+					});
+
+		 	 	}
+		 	 })
+					}else
+					{
 						var IDCliente = filas[0].mayor + 1;
-					//console.log("Agarró el id:"+filas[0].mayor + 1);
-					//console.log(IDCliente,Nombre, ApPat, ApMat, Nac, RFC, Tel, Dir);
 					    RFC = validarRFC(RFC);
 					    Tel = validarTelefono(Tel);
 
               //Aquí va la validación de duplas
-
-const query2 = "SELECT Nombre, ApPat,ApMat FROM cliente WHERE Nombre= ? AND ApPat=? AND ApMat = ?";
+			const query2 = "SELECT Nombre, ApPat,ApMat FROM cliente WHERE Nombre= ? AND ApPat=? AND ApMat = ?";
 		 	 	mysqlConexion.query(query2,[Nombre, ApPat, ApMat],(err,filas,campos)=>{
-		if(filas.length > 0)
+				if(filas.length > 0)
 		 	 	{
-                     res.json({estatus:'Cliente duplicado'}) 
+                     res.json({estatus:'Cliente '+Nombre+' duplicado'}) 
 
 		 	 	}else{
-<<<<<<< HEAD
-
-						const query = "INSERT INTO cliente(IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel) VALUES(?,?,?,?,?,?,?)";
-=======
-		 	 		
-<<<<<<< HEAD
-						const query = "INSERT INTO cliente(IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel) VALUES(?,?,?,?,?,?,?)";
-=======
-						const query = "INSERT INTO cliente(IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel) VALUES(?,?,?,?,?,?,?,?)";
->>>>>>> ea68c0b8fbfedbd4ae659b42ad96eff0f729a3a8
->>>>>>> d19c2b9b29070a0282f0ebbb0659c426728764e8
+					const query = "INSERT INTO cliente(IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel) VALUES(?,?,?,?,?,?,?)";
 					mysqlConexion.query(query,[IDCliente,Nombre,ApPat,ApMat,Nac,RFC,Tel],(err,filas,campos) => {
 						if(!err){
 							res.json({estatus: 'El cliente '+Nombre+' ha sido dado de alta exitosamente!'})
@@ -76,11 +92,15 @@ const query2 = "SELECT Nombre, ApPat,ApMat FROM cliente WHERE Nombre= ? AND ApPa
 
 		 	 	}
 		 	 })		
-					
+				}	
 				}else{
 					console.log(err);
 				}
-			});
+			
+		});
+		 	}else{
+				res.json({estatus:'Teléfono debe ser numérico.'})
+		 	}
 	}else{
 
 		res.json({estatus:'Datos incompletos'})
@@ -93,12 +113,18 @@ const query2 = "SELECT Nombre, ApPat,ApMat FROM cliente WHERE Nombre= ? AND ApPa
 
 //Modificar cliente
 rutas.put('/cliente/:IDCliente',(req,res) =>{
-<<<<<<< HEAD
-	const IDCliente = req.params.IDCliente;
-=======
     const IDCliente =req.params.IDCliente;
->>>>>>> d19c2b9b29070a0282f0ebbb0659c426728764e8
 	const {Nombre, ApPat, ApMat} = req.body;
+	if(validarModificar(Nombre, ApPat, ApMat))
+	{	
+
+		const query2 = "SELECT Nombre, ApPat,ApMat FROM cliente WHERE Nombre= ? AND ApPat=? AND ApMat = ?";
+		 	 	mysqlConexion.query(query2,[Nombre, ApPat, ApMat],(err,filas,campos)=>{
+				if(filas.length > 0)
+		 	 	{
+                     res.json({estatus:'Cliente '+Nombre+' duplicado'}) 
+
+		 	 	}else{
 	const query= "UPDATE cliente SET Nombre = ?, ApPat = ?, ApMat = ? WHERE IDCliente = ?";
 	mysqlConexion.query(query,[Nombre, ApPat, ApMat, IDCliente],(err,filas,campos)=>{
 		if(!err){
@@ -107,17 +133,19 @@ rutas.put('/cliente/:IDCliente',(req,res) =>{
 			console.log(err);
 		}
 	})
+}
+})
+}else{
+	res.json({estatus:'Datos incompletos'})
+}
 });
 
-<<<<<<< HEAD
-//eliminar
-=======
+
+
 
 //Eliminar cliente
->>>>>>> d19c2b9b29070a0282f0ebbb0659c426728764e8
 rutas.delete('/cliente/:IDCliente'),(req,res) =>{
 	const IDCliente= req.params.IDCliente;
-	console.log(".."+IDCliente);
 	const query ="DELETE FROM cliente WHERE IDCliente = ?";
 	mysqlConexion.query(query,[IDCliente],(err,filas,campos)=>{
 		if(!err){
@@ -151,6 +179,27 @@ function validacion( Nombre, ApPat, ApMat, Nac){
 	 return respuesta;
 }
 
+
+
+function validarModificar(Nombre, ApPat, ApMat){
+	
+    var respuesta=true;
+
+
+
+	if(Nombre == ""){
+		respuesta=false;
+	}
+	if(ApPat == ""){
+		respuesta=false;
+	}
+	if(ApMat == ""){
+		respuesta=false;
+	}
+	
+	 return respuesta;
+}
+
 function validarTelefono(Tel){
 	var respuesta='';
 
@@ -173,3 +222,12 @@ function validarRFC(RFC){
 	return respuesta;
 }
 
+
+function validarNumero(Tel)
+{
+	var respuesta=true;
+	if(isNaN(Tel)){
+		respuesta=false;
+	}
+	return respuesta;
+}

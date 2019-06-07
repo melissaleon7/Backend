@@ -19,6 +19,10 @@ rutas.get('/cliente',(req,res) =>{
 //Buscar cliente por ID
 rutas.get('/cliente/:IDCliente',(req,res)=>{
 	const IDCliente=req.params.IDCliente;
+	if(buscarId(IDCliente))
+	{
+
+	
 	mysqlConexion.query('SELECT * FROM cliente WHERE IDCliente = ?',[IDCliente],(err,filas,campos) =>{
 		if(!err){
 			res.json(filas);
@@ -26,6 +30,10 @@ rutas.get('/cliente/:IDCliente',(req,res)=>{
 			console.log(err);
 		}
 	})
+}else
+{
+	res.jsonm({estatus:'Cliente no existente'})
+}
 });
 
 
@@ -116,7 +124,10 @@ rutas.put('/cliente/:IDCliente',(req,res) =>{
     const IDCliente =req.params.IDCliente;
 	const {Nombre, ApPat, ApMat} = req.body;
 	if(validarModificar(Nombre, ApPat, ApMat))
-	{	
+	{	if(buscarId(IDCliente))
+		{
+
+
 
 		const query2 = "SELECT Nombre, ApPat,ApMat FROM cliente WHERE Nombre= ? AND ApPat=? AND ApMat = ?";
 		 	 	mysqlConexion.query(query2,[Nombre, ApPat, ApMat],(err,filas,campos)=>{
@@ -134,7 +145,10 @@ rutas.put('/cliente/:IDCliente',(req,res) =>{
 		}
 	})
 }
-})
+})}else
+		 	 	{
+		 	 		res.json({estatus:'Cliente no existente'})
+		 	 	}
 }else{
 	res.json({estatus:'Datos incompletos'})
 }
@@ -146,6 +160,10 @@ rutas.put('/cliente/:IDCliente',(req,res) =>{
 //Eliminar cliente
 rutas.delete('/cliente/:IDCliente'),(req,res) =>{
 	const IDCliente= req.params.IDCliente;
+	if(buscarId(IDCliente))
+	{
+
+
 	const query ="DELETE FROM cliente WHERE IDCliente = ?";
 	mysqlConexion.query(query,[IDCliente],(err,filas,campos)=>{
 		if(!err){
@@ -154,6 +172,10 @@ rutas.delete('/cliente/:IDCliente'),(req,res) =>{
 			console.log(err);
 		}
 	})
+}else
+{
+	res.json({estatus:'Cliente no existente'})
+}
 };
 
 module.exports =rutas;
@@ -220,6 +242,23 @@ function validarRFC(RFC){
 	}
 
 	return respuesta;
+}
+
+
+
+
+function buscarId(IDCliente)
+{
+var respuesta=true;
+const query ="SELECT * FROM cliente WHERE IDCliente=?";
+mysqlConexion.query(query,[IDCliente],(err,filas,campos)=>{ 
+   if(!err){
+			respuesta= false;
+			return respuesta;
+		}else{
+			console.log(err);
+		}
+	})
 }
 
 

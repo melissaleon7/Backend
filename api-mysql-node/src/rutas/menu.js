@@ -17,13 +17,20 @@ rutas.get('/menu',(req,res) =>{
 //Buscar menu por ID
 rutas.get('/menu/:IDPlatillo',(req,res)=>{
 	const IDPlatillo=req.params.IDPlatillo;
+	if(buscarId(IDPlatillo))
+	{
+
+
 	mysqlConexion.query('SELECT * FROM menu WHERE IDPlatillo = ?',[IDPlatillo],(err,filas,campos) =>{
 		if(!err){
 			res.json(filas);
 		}else{
 			console.log(err);
 		}
-	})
+	})}
+	else{
+		res.json({estatus:'Platillo no existente'})
+	}
 });
 
 
@@ -152,6 +159,10 @@ else{
 //Eliminar platillo
 rutas.delete('/menu/:IDPlatillo'),(req,res) =>{
 	const IDPlatillo= req.params.IDPlatillo;
+	if(buscarId(IDPlatillo))
+	{
+
+
 	const query ="DELETE FROM menu WHERE IDPlatillo = ?";
 	mysqlConexion.query(query,[IDPlatillo],(err,filas,campos)=>{
 		if(!err){
@@ -160,6 +171,9 @@ rutas.delete('/menu/:IDPlatillo'),(req,res) =>{
 			console.log(err);
 		}
 	})
+}else{
+	res.json({estatus:'Platillo no existente'})
+}
 };
 
 

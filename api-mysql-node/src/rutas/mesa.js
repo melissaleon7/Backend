@@ -5,8 +5,19 @@ const mysqlConexion = require('../basededatos.js')
 
 
 //Consulta de mesas libres
-rutas.get('/mesa',(req,res) =>{
-	mysqlConexion.query('SELECT * FROM mesa',(err,filas,campos) =>{
+rutas.get('/mesaLibre',(req,res) =>{
+	mysqlConexion.query('SELECT m.IDMesa,m.Cantidad FROM mesa AS m INNER JOIN clientemesa AS cm ON cm.IDMesa1=m.IDMesa WHERE cm.IDCliente = ""  ',(err,filas,campos) =>{
+		if(!err){
+			res.json(filas);
+		}else{
+			console.log(err)
+		}
+	})
+});
+
+//consulta de mesas ocupadas
+rutas.get('/mesaOcupada',(req,res) =>{
+	mysqlConexion.query('SELECT m.IDMesa FROM mesa AS m INNER JOIN clientemesa AS cm ON cm.IDMesa1=m.IDMesa WHERE cm.IDCliente <> ""  ',(err,filas,campos) =>{
 		if(!err){
 			res.json(filas);
 		}else{
@@ -30,18 +41,67 @@ rutas.get('/mesa/:IDmesa',(req,res)=>{
 
 
 
-//Dar de alta mesas
-rutas.post('/mesa',(req,res) =>{
-	const { IDMesa, Cantidad} = req.body;
-	const query = "INSERT INTO mesa(IDMesa,Cantidad) VALUES(?,?)";
-	mysqlConexion.query(query,[IDMesa,Cantidad],(err,filas,campos)=>{
-		if(!err){
-			res.json({estatus:"¡Mesa agregada con"+Cantidad+" de capacidad"});
-		}else{
-			console.log(err);
-		}
-	})
-	});
+
+
+
+
+//Alta de mesa
+rutas.post('/mesa',(req,res) => {
+	var {Cantidad} = req.body;
+    if(validacion(Cantidad))
+    {     
+    	
+
+      //Aquí regresamo el ID de la última inserción para agregarlo al nuevo empleado+1
+			const query1 = "SELECT MAX(IDMesa) AS mayor FROM mesa";
+		 	 mysqlConexion.query(query1,(err,filas,campos)=>{
+				if(!err){
+					if(filas[0].mayor<=0){
+						IDMesa = 1;
+						
+						 //Aquí va la validación de duplas
+			
+					const query = "INSERT INTO mesa(IDMesa,Cantidad) VALUES(?,?)";
+					mysqlConexion.query(query,[IDMesa,Cantidad],(err,filas,campos) => {
+						if(!err){
+							res.json({estatus: 'La mesa '+Nombre+' ha sido dado de alta exitosamente!'})
+					
+						}else{
+						console.log("Hay un error "+err);	
+						}
+						});
+
+		 	 			 	 
+		 	
+					}else
+					{
+						var IDMesa = filas[0].mayor + 1;
+					    
+            
+					const query = "INSERT INTO mesa(IDMesa,Cantidad) VALUES(?,?)";
+					mysqlConexion.query(query,[IDMesa,Cantidad],(err,filas,campos) => {
+						if(!err){
+							res.json({estatus: 'La mesa ha sido dado de alta exitosamente!'})
+					
+						}else{
+						console.log("Hay un error "+err);	
+						}
+					});
+
+		 	 	}
+		 	 	
+					
+				}else{
+					console.log(err);
+				}
+			});
+			
+	}else{
+
+		res.json({estatus:'Datos incompletos'})
+	}
+    		
+});
 
 
 
@@ -49,6 +109,14 @@ rutas.post('/mesa',(req,res) =>{
 rutas.put('/mesa/:IDmesa',(req,res) =>{
 	const IDmesa = req.params.IDmesa;
 	const {Cantidad} = req.body;
+	if(validarModificar(Cantidad))
+	{
+
+
+	if(buscarId(IDmesa))
+	{
+
+
 	const query= "UPDATE mesa SET Cantidad=? WHERE IDmesa = ?";
 	mysqlConexion.query(query,[Cantidad,IDmesa],(err,filas,campos)=>{
 		if(!err){
@@ -57,12 +125,22 @@ rutas.put('/mesa/:IDmesa',(req,res) =>{
 			console.log(err);
 		}
 	})
+}else{
+	res.json({estatus:'Mesa no existente'})
+}
+}else{
+	res.json({estatus:'Datos incompletos'})
+}
 });
 
 
 //Eliminar mesa
 rutas.delete('/mesa/:IDmesa'),(req,res) =>{
 	const IDmesa= req.params.IDmesa;
+	if(buscarId(IDmesa))
+	{
+
+
 	const query ="DELETE FROM mesa WHERE IDmesa = ?";
 	mysqlConexion.query(query,[IDmesa],(err,filas,campos)=>{
 		if(!err){
@@ -71,25 +149,15 @@ rutas.delete('/mesa/:IDmesa'),(req,res) =>{
 			console.log(err);
 		}
 	})
+}else
+{
+	res.json({estatus:'Mesa no existente'})
+}
 };
 
 
 module.exports =rutas;
 
-function regresarID()
-{
-	IDmesa=0;
-
-	const query= "SELECT MAX(IDmesa) AS mayor FROM mesa";
-	mysqlConexion.query(query,(err,filas,campos)=>{
-		if(!err){
-			IDmesa= filas['mayor']+1;
-		}else{
-			console.log("mm"+err);
-		}
-	})
-	return IDmesa;
-}
 
 function validacion( Cantidad ){
 	
@@ -106,3 +174,26 @@ function validacion( Cantidad ){
 
 
 
+function validarModificar(Cantidad){
+	
+    var respuesta=true;
+
+	if(Cantidad == ""){
+		respuesta=false;
+	}
+	 return respuesta;
+}
+
+function buscarId(IDMesa)
+{
+var respuesta=true;
+const query ="SELECT * FROM mesa WHERE IDMesa=?";
+mysqlConexion.query(query,[IDMesa],(err,filas,campos)=>{ 
+   if(!err){
+			respuesta= false;
+			return respuesta;
+		}else{
+			console.log(err);
+		}
+	})
+}

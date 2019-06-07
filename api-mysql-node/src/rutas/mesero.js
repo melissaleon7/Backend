@@ -112,6 +112,8 @@ rutas.put('/mesero/:IDEmp',(req,res) =>{
 	const {Nombre, ApPat, ApMat, Sueldo} = req.body;
 	if(validarModificar(Nombre, ApPat,ApMat,Sueldo))
 	{
+	if(buscarId(IDEmp))
+	{
 	
 		const query2 = "SELECT Nombre, ApPat,ApMat FROM mesero WHERE Nombre= ? AND ApPat=? AND ApMat = ?";
 		 	 	mysqlConexion.query(query2,[Nombre, ApPat, ApMat],(err,filas,campos)=>{
@@ -131,6 +133,11 @@ rutas.put('/mesero/:IDEmp',(req,res) =>{
 }
 })
 }else{
+	res.json({estatus:'Empleado no encontrado'})
+
+}
+}else
+{
 	res.json({estatus:'Datos incompletos'})
 }
 });
